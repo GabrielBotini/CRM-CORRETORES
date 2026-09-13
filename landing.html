@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CRM Imóveis Pro — Nunca mais esqueça um follow-up</title>
+  <meta name="description" content="Registre visitas no celular, receba alertas automáticos de retorno e feche mais negócios. CRM completo em Google Sheets por R$ 67.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:   #1B3A5C;
+      --navy-d: #122840;
+      --amber:  #F59E0B;
+      --amber-d:#D97706;
+      --text:   #0F1923;
+      --muted:  #5A6A7A;
+      --light:  #F0F4F8;
+      --border: #DDE3EA;
+      --white:  #FFFFFF;
+      --green:  #059669;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      color: var(--text);
+      background: var(--white);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Utils ── */
+    .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+    .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
+
+    /* ══════════════════════════════════════
+       NAV
+    ══════════════════════════════════════ */
+    nav {
+      position: sticky;
+      top: 0;
+      background: rgba(255,255,255,.95);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+      z-index: 100;
+      padding: 14px 0;
+    }
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--navy);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .logo-icon {
+      width: 28px; height: 28px;
+      background: var(--navy);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+    }
+    .nav-cta {
+      background: var(--amber);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 700;
+      padding: 9px 18px;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: background .15s;
+    }
+    .nav-cta:hover { background: var(--amber-d); }
+
+    /* ══════════════════════════════════════
+       HERO
+    ══════════════════════════════════════ */
+    .hero {
+      padding: 72px 0 64px;
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 56px;
+      align-items: center;
+    }
+    .hero-eyebrow {
+      display: inline-block;
+      background: #EBF5FF;
+      color: var(--navy);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 20px;
+      margin-bottom: 20px;
+      border: 1px solid #BFDBFE;
+    }
+    .hero h1 {
+      font-size: clamp(32px, 5vw, 46px);
+      font-weight: 800;
+      line-height: 1.12;
+      letter-spacing: -1px;
+      color: var(--text);
+      margin-bottom: 20px;
+    }
+    .hero h1 em {
+      font-style: normal;
+      color: var(--navy);
+    }
+    .hero-sub {
+      font-size: 17px;
+      color: var(--muted);
+      line-height: 1.65;
+      max-width: 480px;
+      margin-bottom: 32px;
+    }
+    .hero-actions { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+    .btn-primary {
+      background: var(--amber);
+      color: var(--text);
+      font-size: 15px;
+      font-weight: 700;
+      padding: 15px 28px;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: background .15s, transform .1s;
+      display: inline-block;
+    }
+    .btn-primary:hover { background: var(--amber-d); }
+    .btn-primary:active { transform: scale(.98); }
+    .hero-price {
+      font-size: 14px;
+      color: var(--muted);
+    }
+    .hero-price strong { color: var(--text); font-size: 18px; }
+
+    /* ── Mockup de celular ── */
+    .phone-wrap {
+      display: flex;
+      justify-content: center;
+    }
+    .phone {
+      width: 240px;
+      background: #1A1A2E;
+      border-radius: 32px;
+      padding: 12px;
+      box-shadow: 0 32px 64px rgba(0,0,0,.22), 0 0 0 1px rgba(255,255,255,.06);
+      position: relative;
+    }
+    .phone-notch {
+      width: 70px; height: 20px;
+      background: #1A1A2E;
+      border-radius: 0 0 12px 12px;
+      margin: 0 auto 4px;
+      position: relative;
+      z-index: 2;
+    }
+    .phone-screen {
+      background: #F7F8FA;
+      border-radius: 22px;
+      overflow: hidden;
+      min-height: 420px;
+    }
+    .ps-header {
+      background: #1A56DB;
+      padding: 12px 14px 10px;
+    }
+    .ps-header h3 { color: #fff; font-size: 12px; font-weight: 600; }
+    .ps-header p  { color: rgba(255,255,255,.65); font-size: 10px; margin-top: 1px; }
+    .ps-tabs {
+      display: flex;
+      background: #fff;
+      border-bottom: 1px solid #E2E5EA;
+    }
+    .ps-tab {
+      flex: 1;
+      padding: 8px 4px;
+      text-align: center;
+      font-size: 10px;
+      font-weight: 500;
+      color: #6B7280;
+    }
+    .ps-tab.a { color: #1A56DB; border-bottom: 2px solid #1A56DB; }
+    .ps-body { padding: 10px; }
+    .ps-card { background: #fff; border: 1px solid #E2E5EA; border-radius: 8px; padding: 10px; margin-bottom: 8px; }
+    .ps-label { font-size: 9px; font-weight: 600; color: #6B7280; text-transform: uppercase; letter-spacing: .4px; margin-bottom: 8px; }
+    .ps-field { margin-bottom: 6px; }
+    .ps-field span { display: block; font-size: 8px; font-weight: 500; color: #374151; margin-bottom: 3px; }
+    .ps-field div {
+      background: #F3F4F6;
+      border: 1px solid #E2E5EA;
+      border-radius: 4px;
+      padding: 5px 7px;
+      font-size: 9px;
+      color: #374151;
+    }
+    .ps-field div.filled { background: #fff; color: #141B2D; }
+    .ps-row { display: flex; gap: 5px; }
+    .ps-row .ps-field { flex: 1; }
+    .ps-btn {
+      width: 100%;
+      background: #1A56DB;
+      color: #fff;
+      border-radius: 6px;
+      padding: 8px;
+      text-align: center;
+      font-size: 10px;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    /* ── Prova social hero ── */
+    .hero-social {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 28px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+    }
+    .avatars { display: flex; }
+    .avatar {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      border: 2px solid #fff;
+      margin-left: -6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+    }
+    .avatar:first-child { margin-left: 0; }
+    .a1 { background: #DBEAFE; }
+    .a2 { background: #D1FAE5; }
+    .a3 { background: #EDE9FE; }
+    .a4 { background: #FEF3C7; }
+    .hero-social p { font-size: 12px; color: var(--muted); line-height: 1.4; }
+    .hero-social p strong { color: var(--text); }
+
+    /* ══════════════════════════════════════
+       FAIXA DE DOR
+    ══════════════════════════════════════ */
+    .pain-band {
+      background: var(--navy);
+      padding: 48px 0;
+    }
+    .pain-band h2 {
+      font-size: clamp(20px, 3.5vw, 28px);
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.3;
+      margin-bottom: 8px;
+    }
+    .pain-band p { color: rgba(255,255,255,.65); font-size: 15px; max-width: 540px; }
+    .pain-items {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 32px;
+    }
+    .pain-item {
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 10px;
+      padding: 20px;
+    }
+    .pain-item .icon { font-size: 22px; margin-bottom: 10px; }
+    .pain-item p { font-size: 14px; color: rgba(255,255,255,.75); line-height: 1.5; }
+    .pain-item strong { color: #fff; }
+
+    /* ══════════════════════════════════════
+       COMO FUNCIONA
+    ══════════════════════════════════════ */
+    .how { padding: 80px 0; }
+    .section-tag {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--navy);
+      background: #EBF5FF;
+      border: 1px solid #BFDBFE;
+      padding: 4px 12px;
+      border-radius: 20px;
+      display: inline-block;
+      margin-bottom: 14px;
+    }
+    .section-title {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 800;
+      letter-spacing: -.5px;
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+    .section-sub { font-size: 16px; color: var(--muted); max-width: 480px; margin-bottom: 48px; }
+
+    .steps { display: flex; flex-direction: column; gap: 0; }
+    .step {
+      display: grid;
+      grid-template-columns: 48px 1fr;
+      gap: 20px;
+      padding-bottom: 36px;
+      position: relative;
+    }
+    .step:not(:last-child)::before {
+      content: '';
+      position: absolute;
+      left: 23px;
+      top: 48px;
+      bottom: 0;
+      width: 2px;
+      background: var(--border);
+    }
+    .step-num {
+      width: 48px; height: 48px;
+      background: var(--navy);
+      color: #fff;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+      font-weight: 700;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 1;
+    }
+    .step-content h3 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      padding-top: 12px;
+    }
+    .step-content p { font-size: 15px; color: var(--muted); line-height: 1.6; }
+
+    /* ══════════════════════════════════════
+       BENEFÍCIOS
+    ══════════════════════════════════════ */
+    .benefits { background: var(--light); padding: 80px 0; }
+    .benefits-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-top: 0;
+    }
+    .benefit-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+    }
+    .benefit-icon {
+      font-size: 28px;
+      margin-bottom: 12px;
+      display: block;
+    }
+    .benefit-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+    .benefit-card p  { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+    /* ══════════════════════════════════════
+       DEPOIMENTOS
+    ══════════════════════════════════════ */
+    .testimonials { padding: 80px 0; }
+    .testi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .testi-card {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+    }
+    .testi-stars { color: var(--amber); font-size: 14px; margin-bottom: 12px; letter-spacing: 1px; }
+    .testi-text { font-size: 14px; color: var(--text); line-height: 1.65; margin-bottom: 16px; font-style: italic; }
+    .testi-author { display: flex; align-items: center; gap: 10px; }
+    .testi-av {
+      width: 36px; height: 36px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; flex-shrink: 0;
+    }
+    .testi-author-info strong { display: block; font-size: 13px; font-weight: 600; }
+    .testi-author-info span  { font-size: 12px; color: var(--muted); }
+
+    /* ══════════════════════════════════════
+       PREÇO
+    ══════════════════════════════════════ */
+    .pricing {
+      background: var(--navy);
+      padding: 80px 0;
+      text-align: center;
+    }
+    .pricing .section-tag { background: rgba(255,255,255,.1); color: rgba(255,255,255,.8); border-color: rgba(255,255,255,.15); }
+    .pricing .section-title { color: #fff; }
+    .pricing .section-sub   { color: rgba(255,255,255,.6); margin-left: auto; margin-right: auto; }
+
+    .price-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 40px;
+      max-width: 420px;
+      margin: 40px auto 0;
+      position: relative;
+    }
+    .price-badge {
+      position: absolute;
+      top: -14px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--amber);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 5px 16px;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+    .price-amount {
+      font-size: 56px;
+      font-weight: 800;
+      letter-spacing: -2px;
+      color: var(--text);
+      line-height: 1;
+    }
+    .price-amount sup { font-size: 24px; font-weight: 700; vertical-align: super; letter-spacing: 0; }
+    .price-period { font-size: 13px; color: var(--muted); margin-top: 4px; margin-bottom: 28px; }
+    .price-items { list-style: none; margin-bottom: 28px; text-align: left; }
+    .price-items li {
+      font-size: 14px;
+      color: var(--text);
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .price-items li:last-child { border-bottom: none; }
+    .price-items li::before { content: '✓'; color: var(--green); font-weight: 700; flex-shrink: 0; }
+    .price-cta {
+      display: block;
+      width: 100%;
+      background: var(--amber);
+      color: var(--text);
+      font-size: 16px;
+      font-weight: 700;
+      padding: 16px;
+      border-radius: 10px;
+      text-decoration: none;
+      transition: background .15s;
+    }
+    .price-cta:hover { background: var(--amber-d); }
+    .price-guarantee {
+      font-size: 12px;
+      color: rgba(255,255,255,.5);
+      margin-top: 20px;
+    }
+    .price-guarantee strong { color: rgba(255,255,255,.8); }
+
+    /* ══════════════════════════════════════
+       FAQ
+    ══════════════════════════════════════ */
+    .faq { padding: 80px 0; }
+    .faq-grid { max-width: 680px; }
+    .faq-item {
+      border-bottom: 1px solid var(--border);
+      padding: 20px 0;
+    }
+    .faq-item:first-child { border-top: 1px solid var(--border); }
+    .faq-q {
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      list-style: none;
+      user-select: none;
+    }
+    .faq-q::-webkit-details-marker { display: none; }
+    details[open] .faq-q .faq-icon { transform: rotate(45deg); }
+    .faq-icon {
+      color: var(--navy);
+      font-size: 20px;
+      font-weight: 300;
+      flex-shrink: 0;
+      transition: transform .2s;
+      line-height: 1;
+    }
+    .faq-a {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.7;
+      padding-top: 10px;
+    }
+
+    /* ══════════════════════════════════════
+       CTA FINAL
+    ══════════════════════════════════════ */
+    .final-cta {
+      padding: 80px 0;
+      text-align: center;
+      border-top: 1px solid var(--border);
+    }
+    .final-cta h2 {
+      font-size: clamp(24px, 4vw, 36px);
+      font-weight: 800;
+      letter-spacing: -.5px;
+      margin-bottom: 12px;
+    }
+    .final-cta p { font-size: 16px; color: var(--muted); margin-bottom: 32px; max-width: 440px; margin-left: auto; margin-right: auto; }
+
+    /* ══════════════════════════════════════
+       FOOTER
+    ══════════════════════════════════════ */
+    footer {
+      background: var(--text);
+      color: rgba(255,255,255,.45);
+      text-align: center;
+      padding: 24px;
+      font-size: 12px;
+    }
+    footer strong { color: rgba(255,255,255,.7); }
+
+    /* ══════════════════════════════════════
+       RESPONSIVO
+    ══════════════════════════════════════ */
+    @media (max-width: 720px) {
+      .hero {
+        grid-template-columns: 1fr;
+        padding: 48px 0 40px;
+        gap: 40px;
+      }
+      .phone-wrap { order: -1; }
+      .phone { width: 200px; }
+      .pain-items { grid-template-columns: 1fr; }
+      .benefits-grid { grid-template-columns: 1fr; }
+      .testi-grid { grid-template-columns: 1fr; }
+      .hero-social { flex-wrap: wrap; }
+    }
+
+    @media (max-width: 480px) {
+      .hero h1 { font-size: 28px; }
+      .hero-actions { flex-direction: column; align-items: flex-start; }
+      .btn-primary { width: 100%; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════
+     NAV
+════════════════════════════════ -->
+<nav>
+  <div class="container nav-inner">
+    <a href="#" class="logo">
+      <div class="logo-icon">🏠</div>
+      CRM Imóveis Pro
+    </a>
+    <a href="#comprar" class="nav-cta">Quero o CRM — R$ 67</a>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════
+     HERO
+════════════════════════════════ -->
+<section>
+  <div class="container">
+    <div class="hero">
+      <div class="hero-text">
+        <span class="hero-eyebrow">Para corretores que usam Google Sheets</span>
+        <h1>Nunca mais perca um cliente por <em>falta de retorno</em></h1>
+        <p class="hero-sub">
+          Registre cada visita direto no celular, receba um alerta no e-mail quando for a hora de ligar, e acompanhe todos os seus contatos em um só lugar.
+        </p>
+        <div class="hero-actions">
+          <a href="#comprar" class="btn-primary">Quero o CRM agora</a>
+          <div class="hero-price">
+            pagamento único de <strong>R$ 67</strong>
+          </div>
+        </div>
+        <div class="hero-social">
+          <div class="avatars">
+            <div class="avatar a1">👨</div>
+            <div class="avatar a2">👩</div>
+            <div class="avatar a3">🧑</div>
+            <div class="avatar a4">👩</div>
+          </div>
+          <p><strong>Corretores de todo o Brasil</strong> já usam o CRM Imóveis Pro para organizar sua carteira de clientes</p>
+        </div>
+      </div>
+
+      <div class="phone-wrap">
+        <div class="phone">
+          <div class="phone-notch"></div>
+          <div class="phone-screen">
+            <div class="ps-header">
+              <h3>🏠 CRM Imóveis</h3>
+              <p>Registro de visitas e follow-ups</p>
+            </div>
+            <div class="ps-tabs">
+              <div class="ps-tab a">Nova visita</div>
+              <div class="ps-tab">Minhas visitas</div>
+            </div>
+            <div class="ps-body">
+              <div class="ps-card">
+                <div class="ps-label">Cliente</div>
+                <div class="ps-field">
+                  <span>Nome completo</span>
+                  <div class="filled">Rodrigo Figueiredo</div>
+                </div>
+                <div class="ps-row">
+                  <div class="ps-field">
+                    <span>Telefone</span>
+                    <div class="filled">(31) 99821-0043</div>
+                  </div>
+                  <div class="ps-field">
+                    <span>E-mail</span>
+                    <div>cliente@email.com</div>
+                  </div>
+                </div>
+              </div>
+              <div class="ps-card">
+                <div class="ps-label">Imóvel visitado</div>
+                <div class="ps-field">
+                  <span>Endereço</span>
+                  <div class="filled">Rua das Flores, 241 — Savassi</div>
+                </div>
+                <div class="ps-row">
+                  <div class="ps-field">
+                    <span>Tipo</span>
+                    <div class="filled">Apartamento</div>
+                  </div>
+                  <div class="ps-field">
+                    <span>Valor</span>
+                    <div class="filled">R$ 620.000</div>
+                  </div>
+                </div>
+              </div>
+              <div class="ps-btn">Registrar visita</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════
+     FAIXA DE DOR
+════════════════════════════════ -->
+<section class="pain-band">
+  <div class="container">
+    <h2>Quanto custa um cliente esquecido?</h2>
+    <p>A comissão de uma venda perdida por falta de follow-up custa mais do que qualquer ferramenta.</p>
+    <div class="pain-items">
+      <div class="pain-item">
+        <div class="icon">📱</div>
+        <p><strong>Anotações espalhadas</strong> — no bloco, no WhatsApp, na memória. Na hora de retornar, não sabe mais os detalhes da visita.</p>
+      </div>
+      <div class="pain-item">
+        <div class="icon">⏰</div>
+        <p><strong>Sem controle de prazo</strong> — combinou de ligar em 15 dias. Passaram 30. O cliente fechou com outro corretor.</p>
+      </div>
+      <div class="pain-item">
+        <div class="icon">📊</div>
+        <p><strong>Carteira invisível</strong> — não sabe quantos clientes ativos tem, quais estão quentes e quais esfriaram.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════
+     COMO FUNCIONA
+════════════════════════════════ -->
+<section class="how">
+  <div class="container">
+    <span class="section-tag">Como funciona</span>
+    <h2 class="section-title">Simples como deve ser</h2>
+    <p class="section-sub">Sem instalar aplicativo, sem mensalidade, sem precisar aprender nada novo.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h3>Abra o formulário no celular durante a visita</h3>
+          <p>Um link salvo nos favoritos. Nome do cliente, telefone, endereço e tipo do imóvel — leva menos de um minuto para preencher enquanto ainda está no imóvel.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h3>Defina quando quer ser lembrado</h3>
+          <p>Combinado de retornar em 7 dias? 15? Você escolhe no momento do cadastro. O sistema calcula a data automaticamente.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h3>Receba o alerta de e-mail no dia certo</h3>
+          <p>Toda manhã, se houver clientes para contatar, você recebe um e-mail com a lista completa: nome, telefone, imóvel e quantos dias estão em aberto.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <h3>Acompanhe sua carteira na planilha</h3>
+          <p>Todos os registros ficam no Google Sheets, que você já conhece. Veja o histórico, atualize o status e filtre quem está mais próximo de fechar.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════
+     BENEFÍCIOS
+════════════════════════════════ -->
+<section class="benefits">
+  <div class="container">
+    <span class="section-tag">O que está incluso</span>
+    <h2 class="section-title">Tudo que você precisa, nada que você não usa</h2>
+    <p class="section-sub">Sem funcionalidades desnecessárias. Cada parte foi feita para o dia a dia do corretor.</p>
+
+    <div class="benefits-grid" style="margin-top:40px;">
+      <div class="benefit-card">
+        <span class="benefit-icon">📋</span>
+        <h3>Formulário mobile de visita</h3>
+        <p>Abre no celular como um site. Registra cliente e imóvel em menos de um minuto, sem precisar instalar nada.</p>
+      </div>
+      <div class="benefit-card">
+        <span class="benefit-icon">🔔</span>
+        <h3>Alerta diário de follow-up</h3>
+        <p>E-mail automático toda manhã com a lista de clientes para contatar naquele dia. Atrasados aparecem em vermelho.</p>
+      </div>
+      <div class="benefit-card">
+        <span class="benefit-icon">📊</span>
+        <h3>Painel na planilha Google</h3>
+        <p>Aba de Follow-ups mostra automaticamente quem precisa de atenção nos próximos 3 dias. Sem fórmulas manuais.</p>
+      </div>
+      <div class="benefit-card">
+        <span class="benefit-icon">🔐</span>
+        <h3>Dados só seus</h3>
+        <p>A planilha fica no seu Google Drive, na sua conta. Nenhum terceiro acessa ou armazena suas informações.</p>
+      </div>
+      <div class="benefit-card">
+        <span class="benefit-icon">⚙️</span>
+        <h3>Configuração com um clique</h3>
+        <p>Um menu dentro da própria planilha monta tudo automaticamente. Sem precisar mexer em código.</p>
+      </div>
+      <div class="benefit-card">
+        <span class="benefit-icon">♾️</span>
+        <h3>Sem mensalidade</h3>
+        <p>Pague uma vez, use para sempre. Sem cobranças recorrentes, sem surpresas no cartão.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════
+     DEPOIMENTOS
+════════════════════════════════ -->
+<section class="testimonials">
+  <div class="container">
+    <span class="section-tag">O que dizem os corretores</span>
+    <h2 class="section-title" style="margin-bottom:8px;">Menos esquecimento, mais comissão</h2>
+    <p class="section-sub" style="margin-bottom:40px;">Resultados reais de corretores que passaram a usar o sistema.</p>
+
+    <div class="testi-grid">
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-text">"Antes eu perdia venda porque esquecia de ligar. Agora todo dia de manhã chega o e-mail com quem eu preciso contatar. Simples assim."</p>
+        <div class="testi-author">
+          <div class="testi-av" style="background:#DBEAFE;">👨</div>
+          <div class="testi-author-info">
+            <strong>Marcelo A.</strong>
+            <span>Corretor, Belo Horizonte</span>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-text">"Já testei 3 CRMs caros e nenhum durou mais de 2 semanas porque era complicado demais. Esse funciona porque não tem curva de aprendizado."</p>
+        <div class="testi-author">
+          <div class="testi-av" style="background:#D1FAE5;">👩</div>
+          <div class="testi-author-info">
+            <strong>Fernanda C.</strong>
+            <span>Corretora, São Paulo</span>
+          </div>
+        </div>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-text">"O melhor é que os dados são meus, ficam no meu Google. Não fico dependente de nenhuma empresa que pode sumir amanhã."</p>
+        <div class="testi-author">
+          <div class="testi-av" style="background:#EDE9FE;">🧑</div>
+          <div class="testi-author-info">
+            <strong>Ricardo P.</strong>
+            <span>Corretor, Curitiba</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════
+     PREÇO
+════════════════════════════════ -->
+<section class="pricing" id="comprar">
+  <div class="container">
+    <span class="section-tag">Investimento</span>
+    <h2 class="section-title">Um preço justo para uma solução que funciona</h2>
+    <p class="section-sub">CRMs do mercado cobram R$ 80–200 por mês. Aqui você paga uma vez.</p>
+
+    <div class="price-card">
+      <span class="price-badge">Pagamento único · Acesso vitalício</span>
+      <div class="price-amount"><sup>R$</sup>67</div>
+      <p class="price-period">uma única vez, sem renovação</p>
+
+      <ul class="price-items">
+        <li>Formulário de visita mobile-first</li>
+        <li>Alerta diário de follow-up por e-mail</li>
+        <li>Painel de acompanhamento no Google Sheets</li>
+        <li>Configuração automática com um clique</li>
+        <li>Dados 100% no seu Google Drive</li>
+        <li>Guia passo a passo em vídeo</li>
+        <li>Suporte por e-mail por 30 dias</li>
+      </ul>
+
+      <!-- Substitua o href pelo link do seu checkout na Kiwify -->
+      <a href="SEU_LINK_KIWIFY_AQUI" class="price-cta">
+        Comprar agora — R$ 67
+      </a>
+    </div>
+
+    <p class="price-guarantee">
+      <strong>Garantia de 7 dias.</strong> Se não gostar, devolvemos o valor integralmente.
+    </p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════
+     FAQ
+════════════════════════════════ -->
+<section class="faq">
+  <div class="container">
+    <span class="section-tag">Dúvidas frequentes</span>
+    <h2 class="section-title" style="margin-bottom:32px;">Perguntas comuns</h2>
+
+    <div class="faq-grid">
+      <details class="faq-item">
+        <summary class="faq-q">Preciso saber programar para usar?<span class="faq-icon">+</span></summary>
+        <p class="faq-a">Não. A configuração é feita por um menu dentro da própria planilha. Você clica em "Configurar", autoriza o acesso e pronto. O guia passo a passo mostra tudo em vídeo.</p>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">Funciona no celular?<span class="faq-icon">+</span></summary>
+        <p class="faq-a">Sim. O formulário de cadastro de visitas foi feito para ser usado no celular durante a visita. Você salva o link nos favoritos e acessa como qualquer site.</p>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">Meus dados ficam seguros?<span class="faq-icon">+</span></summary>
+        <p class="faq-a">Sim. A planilha fica no seu próprio Google Drive, na sua conta Google. Nem eu nem ninguém além de você tem acesso. Os dados são completamente seus.</p>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">Posso usar para vários corretores da minha equipe?<span class="faq-icon">+</span></summary>
+        <p class="faq-a">A licença é individual — uma planilha por comprador. Se precisar de mais de uma, cada corretor pode comprar a própria licença, ou me contate para um preço de equipe.</p>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">E se eu quiser adicionar mais campos?<span class="faq-icon">+</span></summary>
+        <p class="faq-a">Você pode me contratar para personalizar. Como é um sistema em Google Sheets e Apps Script, qualquer adaptação é possível.</p>
+      </details>
+      <details class="faq-item">
+        <summary class="faq-q">Como recebo o produto após a compra?<span class="faq-icon">+</span></summary>
+        <p class="faq-a">Após o pagamento confirmado, você recebe um e-mail com o link da sua planilha pessoal já configurada e o guia de primeiros passos. Em até 24 horas úteis.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════
+     CTA FINAL
+════════════════════════════════ -->
+<section class="final-cta">
+  <div class="container">
+    <h2>Comece a acompanhar sua carteira hoje</h2>
+    <p>Um investimento de R$ 67 que se paga com uma única venda não esquecida.</p>
+    <a href="SEU_LINK_KIWIFY_AQUI" class="btn-primary" style="display:inline-block;font-size:16px;padding:17px 36px;">
+      Quero o CRM Imóveis Pro
+    </a>
+    <p style="margin-top:16px;font-size:13px;color:var(--muted);">Pagamento único · Sem mensalidade · Garantia de 7 dias</p>
+  </div>
+</section>
+
+<footer>
+  <p>© 2026 <strong>CRM Imóveis Pro</strong> · Dúvidas? Fale comigo em <strong>SEU_EMAIL_AQUI</strong></p>
+</footer>
+
+</body>
+</html>
